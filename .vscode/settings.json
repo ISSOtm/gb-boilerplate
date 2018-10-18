@@ -1,0 +1,7 @@
+{
+    "rgbdsz80.includePath": [
+        "src/",
+        "src/constants",
+        "src/macros"
+    ]
+}
