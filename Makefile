@@ -70,10 +70,10 @@ $(DEPSDIR)/%.d: $(SRCDIR)/%.asm dummy
 	@set -e
 	@# Generate dependency file (side effect: also compiles!)
 	@# Output to a different file to not overwrite the old one on compilation failure (Make would think the compilation succeeded the next time)
-	$(RGBASM) -M $(@D)/tmp.d $(ASFLAGS) -o $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$<) $<
+	$(RGBASM) -M $@.tmp $(ASFLAGS) -o $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$<) $<
 	@# Add all obj dependencies to the deps file too, so Make knows to remake it
-	@sed 's,\($*\)\.o[ :]*,\1.o $@: ,g' < $(DEPSDIR)/tmp.d > $@
-	@rm $(DEPSDIR)/tmp.d
+	@sed 's,\($*\)\.o[ :]*,\1.o $@: ,g' < $@.tmp > $@
+	@rm $@.tmp
 
 # Include (and potentially remake) all dependency files
 include $(patsubst $(SRCDIR)/%.asm,$(DEPSDIR)/%.d,$(ASMFILES))
