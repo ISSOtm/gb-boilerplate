@@ -15,7 +15,7 @@ Everything in the `src` folder is the source, and can be freely modified however
 
 The file at `src/res/build_date.asm` is compiled individually to include a build date in your ROM. Always comes in handy, and also displayed in the bundled error screen.
 
-If you want to add resources, I recommend using the `res` folder: create one folder per resource, create a `Makefile` inside, and have it explain how to generate the needed resource. (Most likely a binary file.) If file `foo.bar` exists, a built-in rule exists to generate `foo.bar.pb16`, by compressing the file using PB16 (a variation of [PackBits](https://wiki.nesdev.com/w/index.php/Tile_compression#PackBits).
+If you want to add resources, I recommend using the `res` folder: create one folder per resource, create a `Makefile` inside, and have it explain how to generate the needed resource. (Most likely a binary file.) If file `foo.bar` exists, a built-in rule exists to generate `foo.bar.pb16`, by compressing the file using PB16 (a variation of [PackBits](https://wiki.nesdev.com/w/index.php/Tile_compression#PackBits)).
 
 ## Compiling
 Simply put yourself in the root directory of this project, and run the command `make`. This should create a bunch of things, including the output in the `bin` folder.
