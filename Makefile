@@ -83,7 +83,6 @@ $(ROMFILE): $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(ASMFILES))
 	@mkdir -p $(BINDIR)
 
 	@# Generate build date
-	date +"%FT%H:%M:%S" > $(SRCDIR)/res/build.date
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
 
 	$(RGBLINK) $(LDFLAGS) -o $(BINDIR)/tmp.gb -m $(@:.$(ROMExt)=.map) -n $(@:.$(ROMExt)=.sym) $^ $(OBJDIR)/build_date.o

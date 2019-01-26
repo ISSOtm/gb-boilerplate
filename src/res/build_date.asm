@@ -3,5 +3,5 @@ SECTION "Build date", ROM0
 
     db "Built "
 BuildDate::
-INCBIN "res/build.date"
+    db __ISO_8601_UTC__
     db 0
