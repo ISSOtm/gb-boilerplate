@@ -67,8 +67,6 @@ $(DEPSDIR)/%.d: $(SRCDIR)/%.asm dummy
 	@echo Building deps file $@
 	@mkdir -p $(DEPSDIR)
 	@mkdir -p $(OBJDIR)
-	@# Generate dependency file (side effect: also compiles!)
-	@# Output to a different file to make `sed` work (otherwise it would use the same file as input and output)
 	set -e; \
 	$(RGBASM) -M $@.tmp $(ASFLAGS) -o $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$<) $<; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@: ,g' < $@.tmp > $@; \
@@ -82,11 +80,9 @@ include $(patsubst $(SRCDIR)/%.asm,$(DEPSDIR)/%.d,$(ASMFILES))
 $(ROMFILE): $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(ASMFILES))
 	@mkdir -p $(BINDIR)
 
-	@# Generate build date
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
 
 	$(RGBLINK) $(LDFLAGS) -o $(BINDIR)/tmp.gb -m $(@:.$(ROMExt)=.map) -n $(@:.$(ROMExt)=.sym) $^ $(OBJDIR)/build_date.o
-	@# This pass does NOT fix the ROM checksum, to work around a RGBFIX bug. And because it's unnecessary.
 	$(RGBFIX) $(FXFLAGS) $(BINDIR)/tmp.gb
 
 	mv $(BINDIR)/tmp.gb $@
