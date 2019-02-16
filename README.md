@@ -17,6 +17,17 @@ The file at `src/res/build_date.asm` is compiled individually to include a build
 
 If you want to add resources, I recommend using the `res` folder: create one folder per resource, create a `Makefile` inside, and have it explain how to generate the needed resource. (Most likely a binary file.) If file `foo.bar` exists, a built-in rule exists to generate `foo.bar.pb16`, by compressing the file using PB16 (a variation of [PackBits](https://wiki.nesdev.com/w/index.php/Tile_compression#PackBits)).
 
+### Default contents
+
+By default, the boilerplate contains a few files that are technically not required, but should come in handy to most GB devs:
+* A collection of common routines in `home/utils.asm`
+* Some more common routines in the RST vectors as well as a fairly simple VBlank handler in `home/vectors.asm`
+* A PB16 decompressor by @PinoBatch in `unpb16.asm`
+* SGB routines in `sgb.asm`
+* A small but sufficient init code, including a completely unnecessary but nice-looking Nintendo logo fade-out in `home/header.asm`
+* A complete and very useful for debugging error handler in `engine/error_handler.asm`
+Of course, all of those can be removed if you don't care about them.
+
 ## Compiling
 Simply put yourself in the root directory of this project, and run the command `make`. This should create a bunch of things, including the output in the `bin` folder.
 
