@@ -45,34 +45,6 @@ hOBP1::
     db
 
 
-; Low byte of the current scanline buffer
-; Permits double-buffering
-hWhichScanlineBuffer::
-    db
-; Low byte of byte read by STAT handler
-; NO TOUCHY
-hScanlineFXIndex::
-    db
-
-; Scanline FX buffers (scanline, addr, value)
-; Double-buffering used to prevent ract conditions
-hScanlineFXBuffer1::
-    ds 3 * 5 + 1
-hScanlineFXBuffer2::
-    ds 3 * 5 + 1
-
-; Addr/value pair to allow writing to 2 regs in the same scanline
-hSecondFXAddr::
-    db
-hSecondFXValue::
-    db
-
-hIsTextboxActive::
-    db
-hBackupScanlineFXBuffer::
-    ds 3 * 5 + 1
-
-
 ; Joypad regs
 hHeldButtons::
     db

@@ -77,18 +77,11 @@ Reset::
     dec b
     jr nz, .copyOAMDMA
 
-    ld a, LOW(hScanlineFXBuffer1)
-    ldh [hWhichScanlineBuffer], a
-    ld a, $FF
-    ldh [hScanlineFXBuffer1], a
-    ld a, STATF_LYC
-    ldh [rSTAT], a
-
     ld a, LCDCF_ON | LCDCF_BGON
     ldh [hLCDC], a
     ldh [rLCDC], a
 
-    ld a, IEF_VBLANK | IEF_LCDC
+    ld a, IEF_VBLANK
     ldh [rIE], a
     xor a
     ei ; Delayed until the next instruction: perfectly safe!

@@ -98,12 +98,8 @@ ENDM
     jp VBlankHandler
 
     ; LCD
-    push af
-    push bc
-    ldh a, [hScanlineFXIndex]
-    ld c, a
-    ld a, [c] ; Get port ID
-    jr LCDHandler
+    reti
+    ds 7
 
     ; Timer
     reti
@@ -125,70 +121,6 @@ CallDE::
     reti
 
 
-LCDHandler:
-    ld b, a ; Save port ID for later
-    inc c
-    inc c
-    ld a, [c] ; Get next effect's scanline
-    dec a ; Compensate for processing time
-    ldh [rLYC], a ; Get set up (hopefully this should reset the interrupt trigger line)
-    ld a, c ; Point to next effect's port ID
-    inc a
-    ldh [hScanlineFXIndex], a
-    dec c
-    ; Wait a bit to write during HBlank, to avoid gfx artifacts
-    ld a, 4
-.waitMode0
-    dec a
-    jr nz, .waitMode0
-
-    ; Check if we're trying to write to P1 ($FF*00*)
-    ld a, b
-    and a ; Note: `and $7F` can be used instead to have control on bit 7 (if ever needed)
-    ; Perform common ops
-    ld a, [c] ; Get value
-    ; rP1 is hardwired to instead perform textbox ops
-    jr nz, .notTextbox
-
-    ldh [rSCY], a ; Store value, which is actually for SCY (dat plot twist, eh?)
-    xor a
-    ldh [rSCX], a
-    ld c, LOW(rLCDC)
-    ldh a, [hLCDC] ; Retrieve LCDC value
-    and ~(LCDCF_WINON | LCDCF_BG8000 | LCDCF_OBJON)
-    or LCDCF_BG9C00
-    ; Note: this is scrapped support for sprites on the textbox
-    ; It was initially planned for JP diacritics.
-    ; If for whatever reason, you need to re-activate this feature...
-    ; ...uncomment this, and remove "LCDCF_OBJON" from above.
-    ; 
-    ; ld [c], a ; Apply LCDC modification
-    ; ; Perform OAM DMA to get textbox's sprites
-    ; ; Luckily, sprites are hidden during DMA
-    ; ; Also no sprites should be present on the textbox 1st row, hiding our trickery >:P
-    ; ld a, HIGH(wTextboxOAM)
-    ; call hOAMDMA
-    ; ; Reload OAM on next frame
-    ; ldh a, [hCurrentOAMBuffer]
-    ; ldh [hOAMBuffer], a
-    ; jr .onlyOneEffect
-
-.notTextbox
-    ld c, b ; Retrieve port
-    res 7, c
-    ld [c], a ; Apply FX
-    bit 7, b
-    jr z, .onlyOneEffect
-    ldh a, [hSecondFXAddr]
-    ld c, a
-    ldh a, [hSecondFXValue]
-    ld [$ff00+c], a
-.onlyOneEffect
-    pop bc
-    pop af
-    reti
-
-
 SECTION "VBlank handler", ROM0
 
 VBlankHandler:
@@ -201,19 +133,6 @@ VBlankHandler:
     transfer_reg SCX
     transfer_reg WY
     transfer_reg WX
-
-
-    ldh a, [hWhichScanlineBuffer]
-    ld c, a
-    ; Get first effect's scanline
-    ld a, [$ff00+c]
-    dec a ; Compensate for the processing time
-    ; NOTE: this assumes no effect is scheduled on line 0
-    ; This should never happen; instead, use the HRAM shadow regs (hSCY, etc.)
-    ldh [rLYC], a
-    inc c
-    ld a, c
-    ldh [hScanlineFXIndex], a
 
 
     ; Update OAM if needed
