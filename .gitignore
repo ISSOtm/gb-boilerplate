@@ -2,4 +2,3 @@ bin/
 deps/
 dummy
 obj/
-src/res/build.date
