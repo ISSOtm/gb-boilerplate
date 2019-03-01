@@ -18,6 +18,7 @@ ROMFILE = $(BINDIR)/$(ROMName).$(ROMExt)
 RGBASM  = rgbasm
 RGBLINK = rgblink
 RGBFIX  = rgbfix
+MKDIR   = $(shell which mkdir)
 
 # Argument constants
 ASFLAGS += -E -h -i $(SRCDIR)/ -i $(SRCDIR)/constants/ -i $(SRCDIR)/macros/ -p $(FillValue)
@@ -65,8 +66,8 @@ dummy: $(INITTARGETS)
 # > This would cause the first compilation to never finish, thus Make never knows to build the binary files, thus deadlocking everything.
 $(DEPSDIR)/%.d: $(SRCDIR)/%.asm dummy
 	@echo Building deps file $@
-	@mkdir -p $(DEPSDIR)
-	@mkdir -p $(OBJDIR)
+	@$(MKDIR) -p $(DEPSDIR)
+	@$(MKDIR) -p $(OBJDIR)
 	set -e; \
 	$(RGBASM) -M $@.tmp $(ASFLAGS) -o $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$<) $<; \
 	sed 's,\($*\)\.o[ :]*,\1.o $@: ,g' < $@.tmp > $@; \
@@ -78,7 +79,7 @@ include $(patsubst $(SRCDIR)/%.asm,$(DEPSDIR)/%.d,$(ASMFILES))
 
 # How to make the ROM
 $(ROMFILE): $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(ASMFILES))
-	@mkdir -p $(BINDIR)
+	@$(MKDIR) -p $(BINDIR)
 
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
 
@@ -90,6 +91,6 @@ $(ROMFILE): $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(ASMFILES))
 # How to make the objects files
 # (Just in case; since generating the deps files also generates the OBJ files, this should not be run ever, unless the OBJ files are destroyed but the deps files aren't.)
 $(OBJDIR)/%.o: $(SRCDIR)/%.asm
-	@mkdir -p $(OBJDIR)
+	@$(MKDIR) -p $(OBJDIR)
 	$(RGBASM) $(ASFLAGS) -o $@ $<
 
