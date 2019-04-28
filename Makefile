@@ -48,6 +48,10 @@ ASMFILES := $(wildcard $(SRCDIR)/*.asm)
 %.pb16: %
 	src/tools/pb16.py $< $@
 
+# RGBGFX generates tilemaps with sequential tile IDs, which works fine for $8000 mode but not $8800 mode; `bit7ify.py` takes care to flip bit 7 so maps become $8800-compliant
+%.bit7.tilemap: src/tools/bit7ify.py %.tilemap
+	$^ $@
+
 
 CLEANTARGETS := $(BINDIR) $(DEPSDIR) $(OBJDIR) dummy # The list of things that must be cleared; expanded by the resource Makefiles
 INITTARGETS :=
