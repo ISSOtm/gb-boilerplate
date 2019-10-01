@@ -31,7 +31,7 @@ include Makefile.conf
 # Argument constants
 ASFLAGS += -E -h -i $(SRCDIR)/ -i $(SRCDIR)/constants/ -i $(SRCDIR)/macros/ -p $(FillValue)
 LDFLAGS += -d -p $(FillValue)
-FXFLAGS += -j -f lh -i $(GameID) -k $(NewLicensee) -l $(OldLicensee) -m $(MBCType) -n $(ROMVersion) -p $(FillValue) -r $(SRAMSize) -t $(GameTitle)
+FXFLAGS += -j -v -i $(GameID) -k $(NewLicensee) -l $(OldLicensee) -m $(MBCType) -n $(ROMVersion) -p $(FillValue) -r $(SRAMSize) -t $(GameTitle)
 
 # The list of "root" ASM files that RGBASM will be invoked on
 ASMFILES := $(wildcard $(SRCDIR)/*.asm)
