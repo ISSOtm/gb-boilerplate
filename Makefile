@@ -1,8 +1,5 @@
 
 .SUFFIXES:
-.DEFAULT_GOAL := all
-
-
 
 ################################################
 #                                              #
@@ -11,32 +8,35 @@
 ################################################
 
 # Directory constants
-SRCDIR  = src
-BINDIR  = bin
-OBJDIR  = obj
-DEPSDIR = deps
+SRCDIR := src
+BINDIR := bin
+OBJDIR := obj
+DEPDIR := dep
+RESDIR := res
 
 # Program constants
-RGBASM  = rgbasm
-RGBLINK = rgblink
-RGBFIX  = rgbfix
-MKDIR   = $(shell which mkdir)
+MKDIR  := $(shell which mkdir)
+# Shortcut if you want to use a local copy of RGBDS
+RGBDS   =
+RGBASM  = $(RGBDS)rgbasm
+RGBLINK = $(RGBDS)rgblink
+RGBFIX  = $(RGBDS)rgbfix
 
-ROMFile = $(BINDIR)/$(ROMName).$(ROMExt)
-
-# Project-specific configuration
-include Makefile.conf
-
+ROM = $(BINDIR)/$(ROMNAME).$(ROMEXT)
 
 # Argument constants
-ASFLAGS += -E -h -i $(SRCDIR)/ -i $(SRCDIR)/constants/ -i $(SRCDIR)/macros/ -p $(FillValue)
-LDFLAGS += -d -p $(FillValue)
-FXFLAGS += -j -v -i $(GameID) -k $(NewLicensee) -l $(OldLicensee) -m $(MBCType) -n $(ROMVersion) -p $(FillValue) -r $(SRAMSize) -t $(GameTitle)
+INCDIRS  = $(SRCDIR)/ $(SRCDIR)/include/
+WARNINGS = all extra
+ASFLAGS  = -p $(PADVALUE) $(addprefix -i,$(INCPATHS)) $(addprefix -W,$(WARNINGS))
+LDFLAGS  = -p $(PADVALUE)
+FIXFLAGS = -p $(PADVALUE) -v -i "$(GAMEID)" -k "$(LICENSEE)" -l $(OLDLIC) -m $(MBC) -n $(VERSION) -r $(SRAMSIZE) -t $(TITLE)
 
 # The list of "root" ASM files that RGBASM will be invoked on
-ASMFILES := $(wildcard $(SRCDIR)/*.asm)
+SRCS = $(wildcard $(SRCDIR)/*.asm)
 
-
+## Project-specific configuration
+# Use this to override the above
+include project.mk
 
 ################################################
 #                                              #
@@ -44,31 +44,29 @@ ASMFILES := $(wildcard $(SRCDIR)/*.asm)
 #                                              #
 ################################################
 
-# Define how to compress files (same recipe for any file)
-%.pb16: %
-	src/tools/pb16.py $< $@
+# By default, asset recipes convert files in `res/` into other files in `res/`
+# This line causes assets not found in `res/` to be also looked for in `src/res/`
+# "Source" assets can thus be safely stored there without `make clean` removing them
+VPATH := $(SRCDIR)
 
-# RGBGFX generates tilemaps with sequential tile IDs, which works fine for $8000 mode but not $8800 mode; `bit7ify.py` takes care to flip bit 7 so maps become $8800-compliant
-%.bit7.tilemap: src/tools/bit7ify.py %.tilemap
+# Define how to compress files using the PackBits16 codec
+# Compressor script requires Python 3
+$(RESDIR)/%.pb16: $(SRCDIR)/tools/pb16.py $(RESDIR)/%
 	$^ $@
 
-
-CLEANTARGETS := $(BINDIR) $(DEPSDIR) $(OBJDIR) dummy # The list of things that must be cleared; expanded by the resource Makefiles
-INITTARGETS :=
-
-# Include all resource Makefiles
-# This must be done before we include `$(DEPSDIR)/all` otherwise `dummy` has no prereqs
-include $(wildcard $(SRCDIR)/res/*/Makefile)
-
-
+###############################################
+#                                             #
+#                 COMPILATION                 #
+#                                             #
+###############################################
 
 # `all` (Default target): build the ROM
-all: $(ROMFile)
+all: $(ROM)
 .PHONY: all
 
 # `clean`: Clean temp and bin files
 clean:
-	-rm -rf $(CLEANTARGETS)
+	-rm -rf $(BINDIR) $(OBJDIR) $(DEPDIR) $(RESDIR)
 .PHONY: clean
 
 # `rebuild`: Build everything from scratch
@@ -78,53 +76,21 @@ rebuild:
 	$(MAKE) all
 .PHONY: rebuild
 
-# `dummy` is a dummy target to build the resource files necessary for RGBASM to not fail on compilation
-# It's made an actual file to avoid an infinite compilation loop
-# INITTARGETS is defined by the resource Makefiles
-dummy: $(INITTARGETS)
-	@echo "THIS FILE ENSURES THAT COMPILATION GOES RIGHT THE FIRST TIME, DO NOT DELETE" > $@
-
-# `.d` files are generated as dependency lists of the "root" ASM files, to save a lot of hassle.
-# > Obj files also depend on `dummy` to ensure all the binary files are present, so RGBASM doesn't choke on them not being present;
-# > This would cause the first compilation to never finish, thus Make never knows to build the binary files, thus deadlocking everything.
-# Compiling also generates dependency files!
-# Also add all obj dependencies to the deps file too, so Make knows to remake it
-# RGBDS is stupid, so dependency files cannot be generated if obj files aren't,
-#  so if a dep file is missing but an obj is there, we need to delete the object and start over
-$(DEPSDIR)/%.d: $(OBJDIR)/%.o ;
-
-$(OBJDIR)/%.o: DEPFILE = $(DEPSDIR)/$*.d
-$(OBJDIR)/%.o: $(SRCDIR)/%.asm dummy
-	@$(MKDIR) -p $(DEPSDIR)
-	@$(MKDIR) -p $(OBJDIR)
-	set -e; \
-	TMP_DEPFILE=$$(mktemp); \
-	$(RGBASM) -M $$TMP_DEPFILE $(ASFLAGS) -o $@ $<; \
-	sed 's,\($*\)\.o[ :]*,\1.o $(DEPFILE): ,g' < $$TMP_DEPFILE > $(DEPFILE); \
-	for line in $$(cut -d ":" -f 2 $$TMP_DEPFILE); do if [ "$$line" != "$<" ]; then echo "$$line: ;" >> $(DEPFILE); fi; done; \
-	rm $$TMP_DEPFILE
-
-# Include (and potentially remake) all dependency files
-# Remove duplicated recipes (`sort | uniq`), hence using yet another file grouping everything
-# Also filter out lines already defined in the resource Makefiles because defining two rules for the same file causes Bad Things(tm) (`grep`)
-SPACE :=
-SPACE +=
-# Yes this "space" hack is NEEDED. I don't like where I'm going anymore, either
-$(DEPSDIR)/all: $(patsubst $(SRCDIR)/%.asm,$(DEPSDIR)/%.d,$(ASMFILES))
-	cat $^ | sort | uniq | grep -vE "^($(subst .,\\.,$(subst $(SPACE),|,$(strip $(INITTARGETS))))): ;" > $@
-ifneq ($(MAKECMDGOALS),clean)
-include $(DEPSDIR)/all
-endif
-
-
-# How to make the ROM
-$(ROMFile): $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(ASMFILES))
-	@$(MKDIR) -p $(BINDIR)
-
+# How to build a ROM
+$(BINDIR)/%.$(ROMEXT) $(BINDIR)/%.sym $(BINDIR)/%.map: $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(SRCS))
+	@$(MKDIR) -p $(@D)
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
+	$(RGBLINK) $(LDFLAGS) -m $(BINDIR)/$*.map -n $(BINDIR)/$*.sym -o $(BINDIR)/$*.$(ROMEXT) $^ $(OBJDIR)/build_date.o \
+	&& $(RGBFIX) -v $(FIXFLAGS) $(BINDIR)/$*.$(ROMEXT)
 
-	set -e; \
-	TMP_ROM=$$(mktemp); \
-	$(RGBLINK) $(LDFLAGS) -o $$TMP_ROM -m $(@:.gb=.map) -n $(@:.gb=.sym) $^ $(OBJDIR)/build_date.o; \
-	$(RGBFIX) $(FXFLAGS) $$TMP_ROM; \
-	mv $$TMP_ROM $(ROMFile)
+# `.mk` files are auto-generated dependency lists of the "root" ASM files, to save a lot of hassle.
+# Also add all obj dependencies to the dep file too, so Make knows to remake it
+# Caution: some of these flags were added in RGBDS 0.4.0, using an earlier version WILL NOT WORK
+# (and produce weird errors)
+$(OBJDIR)/%.o $(DEPDIR)/%.mk: $(SRCDIR)/%.asm
+	@$(MKDIR) -p $(dir $(OBJDIR)/$* $(DEPDIR)/$*)
+	$(RGBASM) $(ASFLAGS) -M $(DEPDIR)/$*.mk -MG -MP -MQ $(OBJDIR)/$*.o -MQ $(DEPDIR)/$*.mk -o $(OBJDIR)/$*.o $<
+
+ifneq ($(MAKECMDGOALS),clean)
+-include $(patsubst $(SRCDIR)/%.asm,$(DEPDIR)/%.mk,$(SRCS))
+endif
