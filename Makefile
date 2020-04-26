@@ -27,7 +27,7 @@ ROM = $(BINDIR)/$(ROMNAME).$(ROMEXT)
 # Argument constants
 INCDIRS  = $(SRCDIR)/ $(SRCDIR)/include/
 WARNINGS = all extra
-ASFLAGS  = -p $(PADVALUE) $(addprefix -i,$(INCPATHS)) $(addprefix -W,$(WARNINGS))
+ASFLAGS  = -p $(PADVALUE) $(addprefix -i,$(INCDIRS)) $(addprefix -W,$(WARNINGS))
 LDFLAGS  = -p $(PADVALUE)
 FIXFLAGS = -p $(PADVALUE) -v -i "$(GAMEID)" -k "$(LICENSEE)" -l $(OLDLIC) -m $(MBC) -n $(VERSION) -r $(SRAMSIZE) -t $(TITLE)
 
