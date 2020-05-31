@@ -26,3 +26,15 @@ Simply open you favorite command prompt / terminal, place yourself in this direc
 
 If you get errors that you don't understand, try running `make clean`. If that gives the same error, try deleting the `deps` folder. If that still doesn't work, try deleting the `bin` and `obj` folders as well. If that still doesn't work, you probably did something wrong yourself.
 
+## See also
+
+If you want something less barebones, already including some "base" code, check out [gb-starter-kit](https://github.com/ISSOtm/gb-starter-kit).
+
+[Here](https://gist.github.com/ISSOtm/a9057e7c66080f36afcd82ed2863fd62) are the naming conventions used in this code; maybe you'll find them useful.
+
+I recommend the [BGB](https://bgb.bircd.org) emulator for developing ROMs on Windows and, via Wine, Linux and macOS (64-bit build available for Catalina). [SameBoy](https://github.com/LIJI32/SameBoy) is more accurate, but has a much worse interface except on macOS.
+
+### Libraries
+
+- [Variable-width font engine](https://github.com/ISSOtm/gb-vwf)
+- [structs in RGBDS](https://github.com/ISSOtm/rgbds-structs)
