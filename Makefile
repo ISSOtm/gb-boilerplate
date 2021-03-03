@@ -15,12 +15,21 @@ DEPDIR := dep
 RESDIR := res
 
 # Program constants
-MKDIR  := $(shell which mkdir)
+ifneq ($(OS),Windows_NT)
+    # POSIX OSes
+    RM_RF := rm -rf
+    MKDIR_P := mkdir -p
+else
+    # Windows
+    RM_RF := -del /q
+    MKDIR_P := -mkdir
+endif
+
 # Shortcut if you want to use a local copy of RGBDS
-RGBDS   =
-RGBASM  = $(RGBDS)rgbasm
-RGBLINK = $(RGBDS)rgblink
-RGBFIX  = $(RGBDS)rgbfix
+RGBDS   :=
+RGBASM  := $(RGBDS)rgbasm
+RGBLINK := $(RGBDS)rgblink
+RGBFIX  := $(RGBDS)rgbfix
 
 ROM = $(BINDIR)/$(ROMNAME).$(ROMEXT)
 
@@ -66,7 +75,10 @@ all: $(ROM)
 
 # `clean`: Clean temp and bin files
 clean:
-	-rm -rf $(BINDIR) $(OBJDIR) $(DEPDIR) $(RESDIR)
+	$(RM_RF) $(BINDIR)
+	$(RM_RF) $(OBJDIR)
+	$(RM_RF) $(DEPDIR)
+	$(RM_RF) $(RESDIR)
 .PHONY: clean
 
 # `rebuild`: Build everything from scratch
@@ -78,7 +90,7 @@ rebuild:
 
 # How to build a ROM
 $(BINDIR)/%.$(ROMEXT) $(BINDIR)/%.sym $(BINDIR)/%.map: $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(SRCS))
-	@$(MKDIR) -p $(@D)
+	@$(MKDIR_P) $(@D)
 	$(RGBASM) $(ASFLAGS) -o $(OBJDIR)/build_date.o $(SRCDIR)/res/build_date.asm
 	$(RGBLINK) $(LDFLAGS) -m $(BINDIR)/$*.map -n $(BINDIR)/$*.sym -o $(BINDIR)/$*.$(ROMEXT) $^ $(OBJDIR)/build_date.o \
 	&& $(RGBFIX) -v $(FIXFLAGS) $(BINDIR)/$*.$(ROMEXT)
@@ -88,7 +100,7 @@ $(BINDIR)/%.$(ROMEXT) $(BINDIR)/%.sym $(BINDIR)/%.map: $(patsubst $(SRCDIR)/%.as
 # Caution: some of these flags were added in RGBDS 0.4.0, using an earlier version WILL NOT WORK
 # (and produce weird errors)
 $(OBJDIR)/%.o $(DEPDIR)/%.mk: $(SRCDIR)/%.asm
-	@$(MKDIR) -p $(dir $(OBJDIR)/$* $(DEPDIR)/$*)
+	@$(MKDIR_P) $(patsubst %/,%,$(dir $(OBJDIR)/$* $(DEPDIR)/$*))
 	$(RGBASM) $(ASFLAGS) -M $(DEPDIR)/$*.mk -MG -MP -MQ $(OBJDIR)/$*.o -MQ $(DEPDIR)/$*.mk -o $(OBJDIR)/$*.o $<
 
 ifneq ($(MAKECMDGOALS),clean)
