@@ -103,6 +103,7 @@ endif
 #                                              #
 ################################################
 
+
 # By default, asset recipes convert files in `res/` into other files in `res/`
 # This line causes assets not found in `res/` to be also looked for in `src/res/`
 # "Source" assets can thus be safely stored there without `make clean` removing them
@@ -112,3 +113,8 @@ VPATH := $(SRCDIR)
 # Compressor script requires Python 3
 $(RESDIR)/%.pb16: $(SRCDIR)/tools/pb16.py $(RESDIR)/%
 	$^ $@
+
+# Catch non-existent files
+# KEEP THIS LAST!!
+%:
+	@false
