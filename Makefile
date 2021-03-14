@@ -49,25 +49,9 @@ include project.mk
 
 ################################################
 #                                              #
-#                RESOURCE FILES                #
+#                    TARGETS                   #
 #                                              #
 ################################################
-
-# By default, asset recipes convert files in `res/` into other files in `res/`
-# This line causes assets not found in `res/` to be also looked for in `src/res/`
-# "Source" assets can thus be safely stored there without `make clean` removing them
-VPATH := $(SRCDIR)
-
-# Define how to compress files using the PackBits16 codec
-# Compressor script requires Python 3
-$(RESDIR)/%.pb16: $(SRCDIR)/tools/pb16.py $(RESDIR)/%
-	$^ $@
-
-###############################################
-#                                             #
-#                 COMPILATION                 #
-#                                             #
-###############################################
 
 # `all` (Default target): build the ROM
 all: $(ROM)
@@ -88,6 +72,12 @@ rebuild:
 	$(MAKE) all
 .PHONY: rebuild
 
+###############################################
+#                                             #
+#                 COMPILATION                 #
+#                                             #
+###############################################
+
 # How to build a ROM
 $(BINDIR)/%.$(ROMEXT) $(BINDIR)/%.sym $(BINDIR)/%.map: $(patsubst $(SRCDIR)/%.asm,$(OBJDIR)/%.o,$(SRCS))
 	@$(MKDIR_P) $(@D)
@@ -106,3 +96,19 @@ $(OBJDIR)/%.o $(DEPDIR)/%.mk: $(SRCDIR)/%.asm
 ifneq ($(MAKECMDGOALS),clean)
 -include $(patsubst $(SRCDIR)/%.asm,$(DEPDIR)/%.mk,$(SRCS))
 endif
+
+################################################
+#                                              #
+#                RESOURCE FILES                #
+#                                              #
+################################################
+
+# By default, asset recipes convert files in `res/` into other files in `res/`
+# This line causes assets not found in `res/` to be also looked for in `src/res/`
+# "Source" assets can thus be safely stored there without `make clean` removing them
+VPATH := $(SRCDIR)
+
+# Define how to compress files using the PackBits16 codec
+# Compressor script requires Python 3
+$(RESDIR)/%.pb16: $(SRCDIR)/tools/pb16.py $(RESDIR)/%
+	$^ $@
