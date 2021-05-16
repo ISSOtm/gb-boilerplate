@@ -30,7 +30,7 @@ If you get errors that you don't understand, try running `make clean`. If that g
 
 If you want something less barebones, already including some "base" code, check out [gb-starter-kit](https://github.com/ISSOtm/gb-starter-kit).
 
-[Here](https://gist.github.com/ISSOtm/a9057e7c66080f36afcd82ed2863fd62) are the naming conventions used in this code; maybe you'll find them useful.
+Perhaps [a gbdev style guide](https://gbdev.io/guides/asmstyle) may be of interest to you?
 
 I recommend the [BGB](https://bgb.bircd.org) emulator for developing ROMs on Windows and, via Wine, Linux and macOS (64-bit build available for Catalina). [SameBoy](https://github.com/LIJI32/SameBoy) is more accurate, but has a much worse interface except on macOS.
 
