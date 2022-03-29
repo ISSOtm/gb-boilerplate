@@ -9,13 +9,13 @@
 
 ## Directory constants
 # These directories can be placed elsewhere if you want; directories whose placement
-# must be fixed lest this Makefile breaks are hardcoded throughout this Makefile
+# must be fixed, lest this Makefile breaks, are hardcoded throughout this Makefile
 BINDIR := bin
 OBJDIR := obj
 DEPDIR := dep
 
 # Program constants
-ifneq ($(OS),Windows_NT)
+ifneq ($(strip $(shell which rm)),)
     # POSIX OSes
     RM_RF := rm -rf
     MKDIR_P := mkdir -p
