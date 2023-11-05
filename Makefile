@@ -23,7 +23,7 @@ RGBGFX  := ${RGBDS}rgbgfx
 ROM = bin/${ROMNAME}.${ROMEXT}
 
 # Argument constants
-INCDIRS  = src/ src/include/
+INCDIRS  = src/ include/
 WARNINGS = all extra
 ASFLAGS  = -p ${PADVALUE} $(addprefix -I,${INCDIRS}) $(addprefix -W,${WARNINGS})
 LDFLAGS  = -p ${PADVALUE}
