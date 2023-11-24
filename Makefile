@@ -10,7 +10,7 @@ RM_RF := rm -rf
 MKDIR_P := mkdir -p
 ifeq ($(strip $(shell which rm)),)
 	# Windows *really* tries its hardest to be Special™!
-	RM_RF := -del /q
+	RM_RF := -rmdir /s /q
 	MKDIR_P := -mkdir
 endif
 
@@ -60,13 +60,13 @@ VPATH := src
 # Define how to compress files using the PackBits16 codec.
 # (The compressor script requires Python 3.)
 assets/%.pb16: src/tools/pb16.py assets/%
-	@${MKDIR_P} ${@D}
+	@${MKDIR_P} "${@D}"
 	$^ $@
 
 # How to build a ROM.
 # Notice that the build date is always refreshed.
 bin/%.${ROMEXT}: $(patsubst src/%.asm,obj/%.o,${SRCS})
-	@${MKDIR_P} ${@D}
+	@${MKDIR_P} "${@D}"
 	${RGBASM} ${ASFLAGS} -o obj/build_date.o src/assets/build_date.asm
 	${RGBLINK} ${LDFLAGS} -m bin/$*.map -n bin/$*.sym -o $@ $^ \
 	&& ${RGBFIX} -v ${FIXFLAGS} $@
@@ -76,7 +76,7 @@ bin/%.${ROMEXT}: $(patsubst src/%.asm,obj/%.o,${SRCS})
 # Caution: some of these flags were added in RGBDS 0.4.0, using an earlier version WILL NOT WORK
 # (and produce weird errors).
 obj/%.mk: src/%.asm
-	@${MKDIR_P} ${@D}
+	@${MKDIR_P} "${@D}"
 	${RGBASM} ${ASFLAGS} -M $@ -MG -MP -MQ ${@:.mk=.o} -MQ $@ -o ${@:.mk=.o} $<
 # DO NOT merge this with the rule above, otherwise Make will assume that the `.o` file is generated,
 # even when it isn't!
