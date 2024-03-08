@@ -25,6 +25,14 @@ Always comes in handy.
 If you want to add resources, I recommend using the `src/assets` directory.
 Add rules in the Makefile; an example is provided for compressing files using PB16 (a variation of [PackBits](https://wiki.nesdev.com/w/index.php/Tile_compression#PackBits)).
 
+## Licensing
+
+You must keep LICENSE-gb-boilerplate in your repository, but it will not affect the rest of your project (i.e. your files).
+Attribution in the README is appreciated, for instance like this:
+```
+This project uses the [gb-boilerplate](https://github.com/ISSOtm/gb-boilerplate) template by ISSOtm, under the zlib license.
+```
+
 ## Compiling
 
 Simply open you favorite command prompt / terminal, place yourself in this directory (the one the Makefile is located in), and run the command `make`.
