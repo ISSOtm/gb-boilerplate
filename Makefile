@@ -84,6 +84,12 @@ obj/%.mk: src/%.asm
 obj/%.o: obj/%.mk
 	@touch $@
 
+hardware.inc/hardware.inc:
+	@echo '$@ is not present; have you initialized submodules?'
+	@echo 'Run `git submodule update --init`, then `make clean`, then `make` again.'
+	@echo 'Tip: to avoid this, use `git clone --recursive` next time!'
+	@exit 1
+
 ifeq ($(filter clean,${MAKECMDGOALS}),)
 include $(patsubst src/%.asm,obj/%.mk,${SRCS})
 endif

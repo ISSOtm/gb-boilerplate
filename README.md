@@ -4,7 +4,19 @@ A minimal, customizable, ready-to-compile boilerplate for Game Boy RGBDS project
 
 ## Downloading
 
-You can simply clone the repository using Git, or if you just want to download this, click the `Clone or download` button up and to the right of this. This repo is also usable as a GitHub template for creating new repositories.
+You can simply clone this repository and all its submodules required to its proper working:
+
+```sh
+git clone --recurse-submodules https://github.com/ISSOtm/gb-boilerplate.git
+```
+
+Alternatively,  if you just want to download this, click the `Clone or download` button up and to the right of this. This repo is also usable as a GitHub template for creating new repositories.
+
+In any case, don't forget to fetch the submodules:
+
+```sh
+git submodule update --init
+```
 
 ## Setting up
 
