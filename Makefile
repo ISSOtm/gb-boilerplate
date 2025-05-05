@@ -67,7 +67,7 @@ assets/%.pb16: src/tools/pb16.py assets/%
 # Notice that the build date is always refreshed.
 bin/%.${ROMEXT}: $(patsubst src/%.asm,obj/%.o,${SRCS})
 	@${MKDIR_P} "${@D}"
-	${RGBASM} ${ASFLAGS} -o obj/build_date.o src/assets/build_date.asm
+	${RGBASM} ${ASFLAGS} -o obj/lib/build_date.o src/lib/build_date.asm
 	${RGBLINK} ${LDFLAGS} -m bin/$*.map -n bin/$*.sym -o $@ $^ \
 	&& ${RGBFIX} -v ${FIXFLAGS} $@
 
